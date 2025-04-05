@@ -9,7 +9,7 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut,
-  type User
+  User
 } from 'firebase/auth'
 
 // Your Firebase config
@@ -33,8 +33,8 @@ const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider)
     return { user: result.user, error: null }
-  } catch (error: any) {
-    return { user: null, error: error.message }
+  } catch (error: unknown) {
+    return { user: null, error: (error as Error).message }
   }
 }
 
@@ -42,8 +42,8 @@ const resetPassword = async (email: string) => {
   try {
     await sendPasswordResetEmail(auth, email)
     return { error: null }
-  } catch (error: any) {
-    return { error: error.message }
+  } catch (error: unknown) {
+    return { error: (error as Error).message }
   }
 }
 
@@ -51,10 +51,14 @@ const verifyEmail = async (user: User) => {
   try {
     await sendEmailVerification(user)
     return { error: null }
-  } catch (error: any) {
-    return { error: error.message }
+  } catch (error: unknown) {
+    return { error: (error as Error).message }
   }
 }
+
+onAuthStateChanged(auth, () => {
+  // Adjust logic accordingly
+})
 
 export { 
   auth, 
