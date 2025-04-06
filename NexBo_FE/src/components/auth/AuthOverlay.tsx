@@ -59,9 +59,10 @@ export function AuthOverlay({ isOpen, onClose, initialView = 'signin' }: AuthOve
       }
       window.location.href = '/home'
     } catch (err: unknown) {
-      const errorMessage = (err as { code: string }).code === 'auth/invalid-credential' 
+      const firebaseError = err as { code?: string }
+      const errorMessage = firebaseError.code === 'auth/invalid-credential' 
         ? 'Invalid email or password'
-        : (err as { code: string }).code === 'auth/email-already-in-use'
+        : firebaseError.code === 'auth/email-already-in-use'
         ? 'Email already in use. Please sign in instead.'
         : 'Authentication failed. Please try again.'
       setError(errorMessage)
@@ -82,7 +83,6 @@ export function AuthOverlay({ isOpen, onClose, initialView = 'signin' }: AuthOve
       setIsLoading(false)
     }
   }
-
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email) {
@@ -94,12 +94,13 @@ export function AuthOverlay({ isOpen, onClose, initialView = 'signin' }: AuthOve
       const { error } = await resetPassword(email)
       if (error) throw new Error(error)
       setResetSent(true)
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to send reset email. Please try again.')
+    } catch {
+      setError('Failed to send reset email. Please try again.')
     } finally {
       setIsLoading(false)
     }
   }
+
   const handleBack = () => {
     if (showForgotPassword) {
       setShowForgotPassword(false)
@@ -240,7 +241,6 @@ export function AuthOverlay({ isOpen, onClose, initialView = 'signin' }: AuthOve
                         type="button"
                         onClick={() => setShowForgotPassword(true)}
                         className="text-slate-400 hover:text-slate-300"
-                        title="Reset password"
                       >
                         Forgot password?
                       </button>
@@ -273,7 +273,6 @@ export function AuthOverlay({ isOpen, onClose, initialView = 'signin' }: AuthOve
                           setError('')
                         }}
                         className="text-sm text-slate-400 hover:text-slate-300 transition-colors"
-                        title={view === 'signin' ? 'Switch to sign up' : 'Switch to sign in'}
                       >
                         {view === 'signin' 
                           ? "Don't have an account? Sign up"
